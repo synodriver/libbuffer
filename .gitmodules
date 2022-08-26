@@ -1,0 +1,3 @@
+[submodule "c-buffer"]
+	path = c-buffer
+	url = https://github.com/synodriver/c-buffer.git
