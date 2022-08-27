@@ -18,6 +18,6 @@ def _should_use_cffi() -> bool:
 
 
 if not _should_use_cffi():
-    from libbuffer.backends.cython import Buffer
+    from libbuffer.backends.cython import Buffer, RingBuffer
 else:
-    from libbuffer.backends.cffi import Buffer
+    from libbuffer.backends.cffi import Buffer, RingBuffer

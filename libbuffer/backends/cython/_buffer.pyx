@@ -1,7 +1,6 @@
 # cython: language_level=3
 # cython: cdivision=True
 cimport cython
-from cpython.long cimport PyLong_FromLong
 from libc.stdint cimport uint8_t
 
 from libbuffer.backends.cython.buffer cimport (buffer_append_right,
@@ -10,6 +9,9 @@ from libbuffer.backends.cython.buffer cimport (buffer_append_right,
                                                buffer_new_from_string_and_size,
                                                buffer_pop_left, buffer_t)
 
+
+cdef inline str buf_to_str(Buffer buf):
+    return f"Buffer({bytes(buf)})"
 
 @cython.freelist(8)
 @cython.no_gc
@@ -63,19 +65,19 @@ cdef class Buffer:
         if self.buffer!=NULL:
             buffer_del(&self.buffer)
 
-    cpdef inline void extend(self, const uint8_t[::1] data):
+    cpdef inline object extend(self, const uint8_t[::1] data):
         if self.view_count>0:
             raise ValueError("can't change inner buffer while being viewed")
         if buffer_append_right(self.buffer, <uint8_t*>&data[0], <size_t>data.shape[0])==-1:
             raise MemoryError
 
-    cpdef inline void append(self, uint8_t c):
+    cpdef inline object append(self, uint8_t c):
         if self.view_count>0:
             raise ValueError("can't change inner buffer while being viewed")
         if buffer_append_right(self.buffer, &c, 1)==-1:
             raise MemoryError
 
-    cpdef inline void popleft(self, size_t size):
+    cpdef inline object popleft(self, size_t size):
         if self.view_count>0:
             raise ValueError("can't change inner buffer while being viewed")
         if buffer_pop_left(self.buffer, size)==-1:
@@ -113,14 +115,17 @@ cdef class Buffer:
             return ptr[item] # todo: slice?
         elif isinstance(item, slice):
             ret = Buffer()
-            for i in range(item.start, item.stop, item.step):
+            start = item.start or 0
+            stop = item.stop or buffer_get_size(self.buffer)
+            step = item.step or 1
+            for i in range(start, stop, step):
                 ret.append(ptr[i])
             return ret
         else:
             raise ValueError("invalid item")
 
     def __str__(self):
-        return f"Buffer({bytes(self)})"
+        return buf_to_str(self)
 
     def __repr__(self):
-        return f"Buffer({bytes(self)})"
+        return buf_to_str(self)

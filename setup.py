@@ -46,6 +46,17 @@ extensions = [
             ("BUFFER_INCLUDE", '"Python.h"'),
         ],
     ),
+    Extension(
+        "libbuffer.backends.cython._ringbuffer",
+        ["libbuffer/backends/cython/_ringbuffer.pyx", "c-buffer/src/ringbuffer.c"],
+        include_dirs=["./c-buffer/src"],
+        define_macros=[
+            ("BUFFER_MALLOC", "PyMem_Malloc"),
+            ("BUFFER_REALLOC", "PyMem_Realloc"),
+            ("BUFFER_FREE", "PyMem_Free"),
+            ("BUFFER_INCLUDE", '"Python.h"'),
+        ],
+    ),
 ]
 cffi_modules = ["libbuffer/backends/cffi/build.py:ffibuilder"]
 
